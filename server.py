@@ -13,6 +13,7 @@ CORS(app)
 # Load the saved model and scaler
 model = load_model('model.h5')
 scaler = joblib.load('scaler.pkl')
+pca = joblib.load('pca_model.pkl')
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -43,12 +44,11 @@ def predict():
         features_with_bmi = np.array([
             age, gender, height, weight, ap_hi, ap_lo, cholesterol, gluc, smoke, alco, active, bmi
         ])
-
         # Scale features
         features_scaled = scaler.transform([features_with_bmi])
-
+        transformed_features = pca.transform(features_scaled)
         # Make prediction
-        prediction = model.predict(features_scaled)
+        prediction = model.predict(transformed_features)
         risk_score = int(prediction.flatten() * 1000)  # Multiply by 1000 and convert to an integer
 
         # Return prediction result as a JSON response
