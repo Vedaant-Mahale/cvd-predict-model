@@ -94,7 +94,7 @@ const App = () => {
         </div>
         <div className="mb-3">
           <label htmlFor="gender" className="form-label">
-            Gender (1 = Male, 0 = Female):
+            Gender (1 = Male, 2 = Female):
           </label>
           <input
             type="number"
