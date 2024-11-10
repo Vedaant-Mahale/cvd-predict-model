@@ -17,19 +17,47 @@ scaler = joblib.load('scaler.pkl')
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json()
-    features = np.array(data['features'])
-    weight = float(features[3])
-    height = float(features[2]) 
-    height_in_meters = height / 100
-    bmi = weight / (height_in_meters ** 2)
-    features_with_bmi = np.append(features, bmi)
-    features_scaled = scaler.transform([features_with_bmi])
 
-    prediction = model.predict(features_scaled)
+    # Extract features from the incoming data (make sure it's an array or list)
+    features = data['features']
 
-    response = make_response(jsonify({'prediction': prediction.flatten().tolist()}))
-    response.headers["Content-Type"] = "application/json; charset=utf-8"
-    return response
+    try:
+        #the order is the same as the backend expects
+        age = float(features['age'])
+        gender = float(features['gender'])
+        height = float(features['height'])
+        weight = float(features['weight'])
+        ap_hi = float(features['ap_hi'])
+        ap_lo = float(features['ap_lo'])
+        cholesterol = float(features['cholesterol'])
+        gluc = float(features['gluc'])
+        smoke = int(features['smoke'])
+        alco = int(features['alco'])
+        active = int(features['active'])
+
+        # BMI calculation
+        height_in_meters = height / 100
+        bmi = weight / (height_in_meters ** 2)
+        
+        # Add BMI to the feature list
+        features_with_bmi = np.array([
+            age, gender, height, weight, ap_hi, ap_lo, cholesterol, gluc, smoke, alco, active, bmi
+        ])
+
+        # Scale features
+        features_scaled = scaler.transform([features_with_bmi])
+
+        # Make prediction
+        prediction = model.predict(features_scaled)
+        risk_score = int(prediction.flatten() * 1000)  # Multiply by 1000 and convert to an integer
+
+        # Return prediction result as a JSON response
+        response = make_response(jsonify({'prediction': risk_score}))
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
+        return response
+
+    except KeyError as e:
+        return jsonify({"error": f"Missing feature: {str(e)}"}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
