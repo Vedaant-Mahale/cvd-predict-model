@@ -1,246 +1,241 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const App = () => {
   const [features, setFeatures] = useState({
-    age: 0,
-    gender: 0,
-    height: 0,
-    weight: 0,
-    ap_hi: 0,
-    ap_lo: 0,
-    cholesterol: 0,
+    age: "",
+    gender: "",
+    height: "",
+    weight: "",
+    ap_hi: "",
+    ap_lo: "",
+    cholesterol: "",
     gluc: 1,
-    smoke: 0,
-    alco: 0,
-    active: 0,
+    smoke: false,
+    alco: false,
+    active: false,
   });
 
   const [prediction, setPrediction] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFeatures((prevFeatures) => ({
+      ...prevFeatures,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
 
   const handleSubmit = (e) => {
-    
     e.preventDefault();
+
+    // Check if all required fields are filled
+    const missingFields = Object.entries(features).filter(
+      ([key, value]) => value === "" || value === null
+    );
+
+    if (missingFields.length > 0) {
+      setError("Please fill out all required fields.");
+      return;
+    }
+
+    // Wrap the data inside a 'features' key
     const dataToSend = {
-      age: parseInt(features.age), // Ensure all values are integers
-      gender: parseInt(features.gender),
-      height: parseInt(features.height),
-      weight: parseInt(features.weight),
-      ap_hi: parseInt(features.ap_hi),
-      ap_lo: parseInt(features.ap_lo),
-      cholesterol: parseInt(features.cholesterol),
-      gluc: parseInt(features.gluc),
-      smoke: parseInt(features.smoke),
-      alco: parseInt(features.alco),
-      active: parseInt(features.active),
+      features: {
+        age: parseInt(features.age, 10),
+        gender: parseInt(features.gender, 10),
+        height: parseInt(features.height, 10),
+        weight: parseInt(features.weight, 10),
+        ap_hi: parseInt(features.ap_hi, 10),
+        ap_lo: parseInt(features.ap_lo, 10),
+        cholesterol: parseInt(features.cholesterol, 10),
+        gluc: parseInt(features.gluc, 10),
+        smoke: features.smoke ? 1 : 0,
+        alco: features.alco ? 1 : 0,
+        active: features.active ? 1 : 0,
+      },
     };
-    const data = {
-      features: Object.values(dataToSend),  // Send the features as an array
-    };
-    console.log(data);
-    axios.post('http://localhost:5000/predict', data)
-      .then(res => {
-        setPrediction(res.data); // Handle the success response
-        console.log(res.data);
+
+    setLoading(true);
+    setError("");
+
+    axios
+      .post("http://localhost:5000/predict", dataToSend)
+      .then((res) => {
+        setPrediction(res.data);
+        setLoading(false);
       })
-      .catch(err => {
-        console.log("Fail");
+      .catch((err) => {
+        setError("Error in prediction. Please try again.");
+        setLoading(false);
       });
-      
   };
-  const handleAgeChange = (e) =>
-    {
-      setFeatures((prevFeatures) => ({
-        ...prevFeatures,
-        age: e.target.value,
-      }));
-    }
-  const handleGenderChange = (e) =>
-    {
-      setFeatures((prevFeatures) => ({
-        ...prevFeatures,
-        gender: e.target.value,
-      }));
-    }
-  const handleHeightChange = (e) =>
-    {
-      setFeatures((prevFeatures) => ({
-        ...prevFeatures,
-        height: e.target.value,
-      }));
-    }
-  const handleWeightChange = (e) =>
-    {
-      setFeatures((prevFeatures) => ({
-        ...prevFeatures,
-        weight: e.target.value,
-      }));
-    }
-  const handleAphiChange = (e) =>
-    {
-      setFeatures((prevFeatures) => ({
-        ...prevFeatures,
-        ap_hi: e.target.value,
-      }));
-    }
-    const handleAploChange = (e) =>
-    {
-      setFeatures((prevFeatures) => ({
-        ...prevFeatures,
-        ap_lo: e.target.value,
-      }));
-    }
-  const handleCholesterolChange = (e) =>
-    {
-      setFeatures((prevFeatures) => ({
-        ...prevFeatures,
-        cholesterol: e.target.value,
-      }));
-    }
-  const handleGlucoseChange = (e) =>
-    {
-      setFeatures((prevFeatures) => ({
-        ...prevFeatures,
-        glucose: e.target.value,
-      }));
-    }
-  const handleAlcoholChange = (e) =>
-    {
-      setFeatures((prevFeatures) => ({
-        ...prevFeatures,
-        alco: e.target.checked ? 1 : 0,
-      }));
-    }
-  const handleSmokeChange = (e) =>
-  {
-    setFeatures((prevFeatures) => ({
-      ...prevFeatures,
-      smoke: e.target.checked ? 1 : 0,
-    }));
-  }
-  const handleActiveChange = (e) =>
-  {
-    setFeatures((prevFeatures) => ({
-      ...prevFeatures,
-      active: e.target.checked ? 1 : 0,
-    }));
-  }
+
   return (
-    <div>
-      <form>
-        <label>
-          Age:
+    <div className="container mt-5">
+      <h2 className="text-center mb-4">Cardiovascular Disease Prediction Form</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label htmlFor="age" className="form-label">
+            Age:
+          </label>
           <input
             type="number"
+            className="form-control"
+            id="age"
             name="age"
             value={features.age}
-            onChange={handleAgeChange}
+            onChange={handleChange}
+            required
           />
-        </label>
-        <br />
-        <label>
-          Gender:
+        </div>
+        <div className="mb-3">
+          <label htmlFor="gender" className="form-label">
+            Gender (1 = Male, 0 = Female):
+          </label>
           <input
             type="number"
+            className="form-control"
+            id="gender"
             name="gender"
             value={features.gender}
-            onChange={handleGenderChange}
+            onChange={handleChange}
+            required
           />
-        </label>
-        <br />
-        <label>
-          Height:
+        </div>
+        <div className="mb-3">
+          <label htmlFor="height" className="form-label">
+            Height (in cm):
+          </label>
           <input
             type="number"
+            className="form-control"
+            id="height"
             name="height"
             value={features.height}
-            onChange={handleHeightChange}
+            onChange={handleChange}
+            required
           />
-        </label>
-        <br />
-        <label>
-          Weight:
+        </div>
+        <div className="mb-3">
+          <label htmlFor="weight" className="form-label">
+            Weight (in kg):
+          </label>
           <input
             type="number"
+            className="form-control"
+            id="weight"
             name="weight"
             value={features.weight}
-            onChange={handleWeightChange}
+            onChange={handleChange}
+            required
           />
-        </label>
-        <br />
-        <label>
-          AP Hi:
+        </div>
+        <div className="mb-3">
+          <label htmlFor="ap_hi" className="form-label">
+            Systolic Blood Pressure (AP Hi):
+          </label>
           <input
             type="number"
+            className="form-control"
+            id="ap_hi"
             name="ap_hi"
             value={features.ap_hi}
-            onChange={handleAphiChange}
+            onChange={handleChange}
+            required
           />
-        </label>
-        <br />
-        <label>
-          AP Lo:
+        </div>
+        <div className="mb-3">
+          <label htmlFor="ap_lo" className="form-label">
+            Diastolic Blood Pressure (AP Lo):
+          </label>
           <input
             type="number"
+            className="form-control"
+            id="ap_lo"
             name="ap_lo"
             value={features.ap_lo}
-            onChange={handleAploChange}
+            onChange={handleChange}
+            required
           />
-        </label>
-        <br />
-        <label>
-          Cholesterol:
+        </div>
+        <div className="mb-3">
+          <label htmlFor="cholesterol" className="form-label">
+            Cholesterol (1 = Normal, 2 = Above Normal, 3 = Well Above Normal):
+          </label>
           <input
             type="number"
+            className="form-control"
+            id="cholesterol"
             name="cholesterol"
             value={features.cholesterol}
-            onChange={handleCholesterolChange}
+            onChange={handleChange}
+            required
           />
-        </label>
-        <br />
-        <label>
-          Glucose:
+        </div>
+        <div className="mb-3">
+          <label htmlFor="gluc" className="form-label">
+            Glucose (1 = Normal, 2 = Above Normal):
+          </label>
           <input
             type="number"
+            className="form-control"
+            id="gluc"
             name="gluc"
             value={features.gluc}
-            onChange={handleGlucoseChange}
+            onChange={handleChange}
+            required
           />
-        </label>
-        <br />
-        <label>
-          Smoke:
+        </div>
+        <div className="mb-3">
+          <label className="form-check-label">Smoke:</label>
           <input
             type="checkbox"
             name="smoke"
-            checked={features.smoke === 1} // 1 for checked, 0 for unchecked
-            onChange={handleSmokeChange}
+            className="form-check-input"
+            checked={features.smoke}
+            onChange={handleChange}
           />
-        </label>
-        <br />
-        <label>
-          Alcohol:
+        </div>
+        <div className="mb-3">
+          <label className="form-check-label">Alcohol:</label>
           <input
             type="checkbox"
             name="alco"
-            checked={features.alco === 1} // 1 for checked, 0 for unchecked
-            onChange={handleAlcoholChange}
+            className="form-check-input"
+            checked={features.alco}
+            onChange={handleChange}
           />
-        </label>
-        <br />
-        <label>
-          Active:
+        </div>
+        <div className="mb-3">
+          <label className="form-check-label">Active:</label>
           <input
             type="checkbox"
             name="active"
-            checked={features.active === 1} // 1 for checked, 0 for unchecked
-            onChange={handleActiveChange}
+            className="form-check-input"
+            checked={features.active}
+            onChange={handleChange}
           />
-        </label>
-        <button type="submit" onClick={handleSubmit}>Submit</button>
+        </div>
+
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? "Predicting..." : "Submit"}
+        </button>
       </form>
+
+      {prediction && (
+        <div className="mt-4">
+          <h4>Risk Score:</h4>
+          <p>{(prediction.prediction)} out of 1000 have CVD risk</p>
+        </div>
+      )}
+
+      {error && <div className="alert alert-danger mt-4">{error}</div>}
     </div>
   );
-}
+}; 
 
 export default App;
