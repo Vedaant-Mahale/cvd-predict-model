@@ -53,8 +53,6 @@ const App = () => {
         ap_lo: parseInt(features.ap_lo, 10),
         cholesterol: parseInt(features.cholesterol, 10),
         gluc: parseInt(features.gluc, 10),
-        smoke: features.smoke ? 1 : 0,
-        alco: features.alco ? 1 : 0,
         active: features.active ? 1 : 0,
       },
     };
@@ -188,26 +186,6 @@ const App = () => {
             value={features.gluc}
             onChange={handleChange}
             required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-check-label">Smoke:</label>
-          <input
-            type="checkbox"
-            name="smoke"
-            className="form-check-input"
-            checked={features.smoke}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-check-label">Alcohol:</label>
-          <input
-            type="checkbox"
-            name="alco"
-            className="form-check-input"
-            checked={features.alco}
-            onChange={handleChange}
           />
         </div>
         <div className="mb-3">
