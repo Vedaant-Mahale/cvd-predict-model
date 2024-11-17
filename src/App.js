@@ -74,7 +74,9 @@ const App = () => {
 
   return (
     <div className="container mt-5">
-      <h2 className="text-center mb-4">Cardiovascular Disease Prediction Form</h2>
+      <h2 className="text-center mb-4">
+        Cardiovascular Disease Prediction Form
+      </h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label htmlFor="age" className="form-label">
@@ -207,13 +209,13 @@ const App = () => {
       {prediction && (
         <div className="mt-4">
           <h4>Risk Score:</h4>
-          <p>{(prediction.prediction)} out of 1000 have CVD risk</p>
+          <p>{prediction.prediction} out of 1000 have CVD risk</p>
         </div>
       )}
 
       {error && <div className="alert alert-danger mt-4">{error}</div>}
     </div>
   );
-}; 
+};
 
 export default App;
